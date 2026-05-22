@@ -1512,6 +1512,8 @@ function login(p){
   document.getElementById('uRole').textContent=info.role;
   buildSidebar(info.nav);
   const td=document.getElementById('qt_due');if(td)td.value=new Date().toISOString().split('T')[0];
+  // Carregar configurações do perfil logado
+  loadSettings();
   loadAll();renderCalendar();
 }
 function logout(){perfil=null;document.getElementById('loginPage').classList.remove('hidden');document.getElementById('appPage').classList.add('hidden');}
@@ -3373,7 +3375,7 @@ async function reativarCliente(id){
 // ── SETTINGS — SISTEMA DE TEMAS ──
 function setTheme(mode){
   // Guarda o modo (dark/light)
-  const currentStyle=localStorage.getItem('st_theme_style')||'executive';
+  const currentStyle=localStorage.getItem(cfgKey('st_theme_style'))||'executive';
   document.documentElement.removeAttribute('data-theme');
   if(mode==='light'){
     document.documentElement.setAttribute('data-theme','light');
@@ -3385,11 +3387,11 @@ function setTheme(mode){
   }
   document.getElementById('themeBtn-dark')?.classList.toggle('active',mode==='dark');
   document.getElementById('themeBtn-light')?.classList.toggle('active',mode==='light');
-  localStorage.setItem('st_theme_mode',mode);
+  localStorage.setItem(cfgKey('st_theme_mode'),mode);
 }
 function setThemeStyle(style){
-  const mode=localStorage.getItem('st_theme_mode')||'dark';
-  localStorage.setItem('st_theme_style',style);
+  const mode=localStorage.getItem(cfgKey('st_theme_mode'))||'dark';
+  localStorage.setItem(cfgKey('st_theme_style'),style);
   if(mode==='dark'){
     document.documentElement.removeAttribute('data-theme');
     if(style==='midnight') document.documentElement.setAttribute('data-theme','midnight');
@@ -3399,7 +3401,7 @@ function setThemeStyle(style){
 function setFont(font){
   document.body.setAttribute('data-font',font);
   const sel=document.getElementById('fontSelect');if(sel)sel.value=font;
-  localStorage.setItem('st_font',font);
+  localStorage.setItem(cfgKey('st_font'),font);
 }
 function setSize(size){
   const scales={
@@ -3438,7 +3440,7 @@ function setSize(size){
   document.body.style.fontSize=s.base;
   document.body.setAttribute('data-size',size);
   ['sm','md','lg'].forEach(v=>{document.getElementById('sizeBtn-'+v)?.classList.toggle('active',v===size);});
-  localStorage.setItem('st_size',size);
+  localStorage.setItem(cfgKey('st_size'),size);
 }
 function setSpacing(sp){
   // Get current base size to compute spacing proportionally
@@ -3459,7 +3461,7 @@ function setSpacing(sp){
   r.style.setProperty('--gap-md',px(v.g2));
   r.style.setProperty('--line-height',v.lh);
   document.body.setAttribute('data-spacing',sp);
-  localStorage.setItem('st_spacing',sp);
+  localStorage.setItem(cfgKey('st_spacing'),sp);
 }
 function setSpacingBtn(sp){
   setSpacing(sp);
@@ -3482,7 +3484,7 @@ function setRadius(r){
   el.style.setProperty('--r-2xl',v.xl2);
   document.body.setAttribute('data-radius',r);
   ['sharp','default','round'].forEach(s=>{document.getElementById('radiusBtn-'+s)?.classList.toggle('active',s===r);});
-  localStorage.setItem('st_radius',r);
+  localStorage.setItem(cfgKey('st_radius'),r);
 }
 function setShadow(s){
   const map={
@@ -3499,16 +3501,16 @@ function setShadow(s){
   el.style.setProperty('--shadow-xl',v.xl);
   document.body.setAttribute('data-shadow',s);
   ['none','default','strong'].forEach(v2=>{document.getElementById('shadowBtn-'+v2)?.classList.toggle('active',v2===s);});
-  localStorage.setItem('st_shadow',s);
+  localStorage.setItem(cfgKey('st_shadow'),s);
 }
 function setAnimations(on){
   document.body.setAttribute('data-animations',on?'':'off');
-  localStorage.setItem('st_animations',on?'on':'off');
+  localStorage.setItem(cfgKey('st_animations'),on?'on':'off');
 }
 function setBlur(on){
   const t=document.querySelector('.topbar');
   if(t)t.style.backdropFilter=on?'blur(20px)':'none';
-  localStorage.setItem('st_blur',on?'on':'off');
+  localStorage.setItem(cfgKey('st_blur'),on?'on':'off');
 }
 function setAccent(color,colorDim){
   document.documentElement.style.setProperty('--accent',color);
@@ -3516,11 +3518,19 @@ function setAccent(color,colorDim){
   document.documentElement.style.setProperty('--accent-dark',colorDim);
   document.documentElement.style.setProperty('--green',color);
   document.documentElement.style.setProperty('--green-dim',colorDim);
-  localStorage.setItem('st_accent',JSON.stringify({color,colorDim}));
+  localStorage.setItem(cfgKey('st_accent'),JSON.stringify({color,colorDim}));
 }
+// ── CONFIGURAÇÕES POR PERFIL ──
+// Cada usuário tem suas próprias configurações salvas
+function cfgKey(key){
+  // Usa o perfil logado como prefixo — ex: 'luis_st_font'
+  const p=typeof perfil!=='undefined'&&perfil?perfil:'global';
+  return p+'_'+key;
+}
+
 function loadSettings(){
-  const mode=localStorage.getItem('st_theme_mode')||'dark';
-  const style=localStorage.getItem('st_theme_style')||'executive';
+  const mode=localStorage.getItem(cfgKey('st_theme_mode'))||'dark';
+  const style=localStorage.getItem(cfgKey('st_theme_style'))||'executive';
   // Aplicar tema
   document.documentElement.removeAttribute('data-theme');
   if(mode==='light'){document.documentElement.setAttribute('data-theme','light');}
@@ -3530,32 +3540,33 @@ function loadSettings(){
   document.getElementById('themeBtn-light')?.classList.toggle('active',mode==='light');
   const sel=document.getElementById('themeSelect');if(sel)sel.value=style;
   // Fonte
-  const font=localStorage.getItem('st_font')||'plusjakarta';
+  const font=localStorage.getItem(cfgKey('st_font'))||'plusjakarta';
   document.body.setAttribute('data-font',font);
   const fontSel=document.getElementById('fontSelect');if(fontSel)fontSel.value=font;
   // Tamanho
-  const size=localStorage.getItem('st_size')||'md';
+  const size=localStorage.getItem(cfgKey('st_size'))||'md';
   setSize(size);
   // Espaçamento
-  const spacing=localStorage.getItem('st_spacing')||'normal';
+  const spacing=localStorage.getItem(cfgKey('st_spacing'))||'normal';
   setSpacingBtn(spacing);
   // Radius
-  const radius=localStorage.getItem('st_radius')||'default';
+  const radius=localStorage.getItem(cfgKey('st_radius'))||'default';
   setRadius(radius);
   // Shadow
-  const shadow=localStorage.getItem('st_shadow')||'default';
+  const shadow=localStorage.getItem(cfgKey('st_shadow'))||'default';
   setShadow(shadow);
   // Animações
-  const anim=localStorage.getItem('st_animations');
+  const anim=localStorage.getItem(cfgKey('st_animations'));
   if(anim==='off'){document.body.setAttribute('data-animations','off');const t=document.getElementById('toggleAnims');if(t)t.checked=false;}
   // Blur
-  const blur=localStorage.getItem('st_blur');
+  const blur=localStorage.getItem(cfgKey('st_blur'));
   if(blur==='off'){const t=document.querySelector('.topbar');if(t)t.style.backdropFilter='none';const el=document.getElementById('toggleBlur');if(el)el.checked=false;}
   // Accent
-  const accent=localStorage.getItem('st_accent');
+  const accent=localStorage.getItem(cfgKey('st_accent'));
   if(accent){try{const a=JSON.parse(accent);setAccent(a.color,a.colorDim);}catch(e){}}
 }
-loadSettings();
+// Configurações carregadas no login (por perfil)
+// loadSettings() é chamado dentro de login()
 if(typeof lucide!=='undefined')lucide.createIcons();
 
 function toggleFilterDropdown(tipo){

@@ -743,6 +743,15 @@ h1,h2,h3,h4,h5,.modal-head h3,.page-title,.page-header-title,.tk-title,.table-to
 .btn-danger:hover{background:rgba(248,113,113,.2)}
 
 /* TASKS IN MODAL */
+
+/* Task suggestions */
+.task-sugest{
+  padding:5px 11px;border-radius:20px;
+  border:1px solid var(--border-2);background:var(--surface-2);
+  color:var(--text-2);font-size:var(--text-xs);font-weight:600;
+  cursor:pointer;transition:var(--t-fast);white-space:nowrap;
+}
+.task-sugest:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-subtle)}
 .task-list{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
 .task-item{
   display:flex;align-items:flex-start;gap:9px;
@@ -1023,7 +1032,7 @@ tr:last-child td{border-bottom:none}
     </div>
     <div id="topbarPlacar" class="topbar-placar hidden"></div>
     <div id="gerenteSwitcher" class="view-switcher hidden">
-      <span class="view-switcher-label">👁 Visão:</span>
+      <span class="view-switcher-label">Visão:</span>
       <button class="view-btn active" onclick="gerenteView('geral',this)">Geral</button>
       <button class="view-btn" onclick="gerenteView('sdr',this)">SDR</button>
       <button class="view-btn" onclick="gerenteView('luis',this)">Luis H.</button>
@@ -1040,13 +1049,13 @@ tr:last-child td{border-bottom:none}
       <div class="sidebar-nav" id="sidebarNav"></div>
       <div class="tools-wrap">
         <div class="tools-head" onclick="toggleTools()">
-          <span class="tools-head-title">🛠 Ferramentas</span>
+          <span class="tools-head-title">Ferramentas</span>
           <span class="tools-arr open" id="toolsArr">▼</span>
         </div>
         <div id="toolTabsRow" class="ttabs-row">
-          <div class="ttab active" onclick="switchTool('tarefas',this)">✅ Tarefas</div>
-          <div class="ttab" onclick="switchTool('planner',this)">📅 Planner</div>
-          <div class="ttab" onclick="switchTool('calc',this)">🧮 Calc</div>
+          <div class="ttab active" onclick="switchTool('tarefas',this)">Tarefas</div>
+          <div class="ttab" onclick="switchTool('planner',this)">Planner</div>
+          <div class="ttab" onclick="switchTool('calc',this)">Calc</div>
         </div>
         <div class="tool-panels" id="toolPanels">
           <div class="tool-panel active" id="tool-tarefas">
@@ -1489,9 +1498,9 @@ const PERFIS={
   adm:{name:'ADM',role:'Administrador',avatar:'AD',color:'#0a1628',nav:[{label:'Colunas',page:'page-adm-colunas'},{label:'Relatórios',page:'page-adm-relatorios'},{label:'Base Clientes',page:'page-base-clientes'},{label:'Estoque',page:'page-estoque'},{label:'Configurações',page:'page-settings'}]}
 };
 const COLS_DEF={
-  sdr:[{id:'novo',label:'🆕 Novo',cor:'#3b82f6'},{id:'importado',label:'📥 Importado',cor:'#f97316'},{id:'tentando',label:'📞 Tentando contato',cor:'#f59e0b'},{id:'reagendado',label:'♻️ Reagendado',cor:'#8b5cf6'},{id:'qualificado',label:'✅ Qualificado',cor:'#00c853'},{id:'sem_interesse',label:'❌ Sem interesse',cor:'#ef4444'}],
-  vendedor:[{id:'recebido',label:'📋 Recebido',cor:'#3b82f6'},{id:'negociacao',label:'💬 Em negociação',cor:'#f59e0b'},{id:'visita',label:'📅 Visita agendada',cor:'#8b5cf6'},{id:'financiamento',label:'💰 Financiamento',cor:'#14b8a6'},{id:'fechado',label:'🏆 Fechado',cor:'#00c853'},{id:'perdido',label:'❌ Perdido',cor:'#ef4444'}],
-  financiamento:[{id:'aguardando_docs',label:'📄 Aguard. docs',cor:'#f59e0b'},{id:'preenchimento',label:'📝 Preench. ficha',cor:'#3b82f6'},{id:'aguardando_resp',label:'⏳ Aguard. resposta',cor:'#8b5cf6'},{id:'pendencia',label:'🔄 Pendência',cor:'#f97316'},{id:'aprovado',label:'✅ Aprovado',cor:'#00c853'},{id:'aprovado_restricao',label:'⚠️ Aprov. c/ restrição',cor:'#eab308'},{id:'reprovado',label:'❌ Reprovado',cor:'#ef4444'}]
+  sdr:[{id:'novo',label:'Novo',cor:'#3b82f6'},{id:'importado',label:'📥 Importado',cor:'#f97316'},{id:'tentando',label:'Tentando contato',cor:'#f59e0b'},{id:'reagendado',label:'♻️ Reagendado',cor:'#8b5cf6'},{id:'qualificado',label:'Qualificado',cor:'#00c853'},{id:'sem_interesse',label:'❌ Sem interesse',cor:'#ef4444'}],
+  vendedor:[{id:'recebido',label:'📋 Recebido',cor:'#3b82f6'},{id:'negociacao',label:'💬 Em negociação',cor:'#f59e0b'},{id:'visita',label:'Visita agendada',cor:'#8b5cf6'},{id:'financiamento',label:'Financiamento',cor:'#14b8a6'},{id:'fechado',label:'Fechado',cor:'#00c853'},{id:'perdido',label:'Perdido',cor:'#ef4444'}],
+  financiamento:[{id:'aguardando_docs',label:'📄 Aguard. docs',cor:'#f59e0b'},{id:'preenchimento',label:'📝 Preench. ficha',cor:'#3b82f6'},{id:'aguardando_resp',label:'⏳ Aguard. resposta',cor:'#8b5cf6'},{id:'pendencia',label:'🔄 Pendência',cor:'#f97316'},{id:'aprovado',label:'✅ Aprovado',cor:'#00c853'},{id:'aprovado_restricao',label:'⚠️ Aprov. c/ restrição',cor:'#eab308'},{id:'reprovado',label:'Reprovado',cor:'#ef4444'}]
 };
 let perfil=null,allLeads=[],allCam=[],activeDept='sdr',modalTab='dados';
 let colunas=JSON.parse(localStorage.getItem('st_colunas')||'null')||COLS_DEF;
@@ -1527,21 +1536,19 @@ function buildSidebar(nav){
   const viewAtivo=viewMap[perfil]||'geral';
   // Só mudar gerenteViewAtual para o gerente — outros usam suas próprias funções de render
   if(perfil==='gerente'||perfil==='adm') gerenteViewAtual=viewAtivo;
-  // Mostrar switcher para todos
-  sw.classList.remove('hidden');
-  sw.querySelectorAll('.view-btn').forEach(b=>{
-    b.classList.remove('active');
-    const btnView=b.getAttribute('onclick')?.match(/'(\w+)'/)?.[1];
-    if(btnView===viewAtivo) b.classList.add('active');
-    // Não-gerentes: só o próprio botão clicável (visualmente), os outros opacos
-    if(perfil!=='gerente'&&perfil!=='adm'){
-      b.style.opacity=btnView===viewAtivo?'1':'0.35';
-      b.style.pointerEvents='none';
-    } else {
+  // Só mostrar switcher para gerente e ADM — vendedores/SDR não precisam
+  if(perfil==='gerente'||perfil==='adm'){
+    sw.classList.remove('hidden');
+    sw.querySelectorAll('.view-btn').forEach(b=>{
+      b.classList.remove('active');
+      const btnView=b.getAttribute('onclick')?.match(/'(\w+)'/)?.[1];
+      if(btnView===viewAtivo) b.classList.add('active');
       b.style.opacity='1';
       b.style.pointerEvents='auto';
-    }
-  });
+    });
+  } else {
+    sw.classList.add('hidden');
+  }
 }
 function navTo(pageId,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1871,7 +1878,7 @@ function applyFilters(tipo){
     if(groups.tasks){
       const tasks=l.tasks||[];
       if(groups.tasks.includes('pendentes')&&tasks.filter(t=>!t.done).length===0) return false;
-      if(groups.tasks.includes('atrasadas')&&!tasks.some(t=>!t.done&&t.due&&t.due<today)) return false;
+      if(groups.tasks.includes('atrasadas')&&!tasks.some(t=>isTaskLate(t))) return false;
     }
     // SLA
     if(groups.sla&&groups.sla.includes('alerta')){
@@ -1999,19 +2006,19 @@ function renderDayTasks(){
   if(meuResp) all=all.filter(t=>!t.resp||t.resp===meuResp);
   let filtered=all;
   if(tkFilter==='hoje')filtered=all.filter(t=>!t.done&&(!t.due||t.due===today));
-  else if(tkFilter==='atrasadas')filtered=all.filter(t=>!t.done&&t.due&&t.due<today);
+  else if(tkFilter==='atrasadas')filtered=all.filter(t=>isTaskLate(t));
   const pend=all.filter(t=>!t.done).length;
   const ce=document.getElementById('tasksCount');if(ce)ce.textContent=pend;
   if(!filtered.length){el.innerHTML=`<div class="no-tk">${tkFilter==='atrasadas'?'✅ Nenhuma atrasada!':tkFilter==='hoje'?'📭 Nenhuma tarefa hoje':'📭 Nenhuma tarefa'}</div>`;return;}
   el.innerHTML=filtered.map(t=>{
-    const ov=t.due&&t.due<today&&!t.done;
+    const ov=isTaskLate(t);
     const ds=t.due?new Date(t.due+'T00:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'';
     const tid=`task_${t.src}_${t.leadId||0}_${t.taskIdx}`;
     return`<div class="dtask ${ov?'is-late':''} ${t.done?'is-done':''}">
       <div class="dtask-chk ${t.done?'done':''}" onclick="event.stopPropagation();toggleDayTask('${t.src}',${t.leadId||0},${t.taskIdx})">${t.done?'✓':''}</div>
       <div class="dtask-info" onclick="abrirTaskModal('${t.src}',${t.leadId||0},${t.taskIdx})">
         <div class="dtask-name ${t.done?'done':''}">${t.title}</div>
-        <div class="dtask-sub ${ov?'late':''}">${t.resp||''}${ds?' · '+ds:''}${ov?' ⚠':''}</div>
+        <div class="dtask-sub ${ov?'late':''}">${t.resp||''}${ds?' · '+ds+ts:''}${ov?' · Atrasada':''}</div>
         ${t.leadNome?`<div class="dtask-lead" onclick="event.stopPropagation();abrirLeadDaTarefa(${t.leadId})" style="cursor:pointer">📌 ${t.leadNome} <span style="color:var(--teal);font-size:10px">→ abrir</span></div>`:''}
       </div>
     </div>`;}).join('');
@@ -2125,7 +2132,7 @@ function abrirTaskModal(src,leadId,idx){
   if(src==='quick') t=quickTasks[idx];
   if(!t)return;
   const today=new Date().toISOString().split('T')[0];
-  const ov=t.due&&t.due<today&&!t.done;
+  const ov=isTaskLate(t);
   const overlay=document.createElement('div');
   overlay.className='task-action-overlay';
   overlay.id='taskActionOverlay';
@@ -2453,12 +2460,12 @@ function renderLeadModal(l){
   const score=calcScore(l);const sClass=scoreClass(score);const sLabel=scoreLabel(score);
 
   const tabsHTML = `
-    <button class="modal-tab ${modalTab==='dados'?'active':''}" onclick="setModalTab('dados',${l.id})">📋 Dados</button>
-    <button class="modal-tab ${modalTab==='tarefas'?'active':''}" onclick="setModalTab('tarefas',${l.id})">✅ Tarefas (${tasks.filter(t=>!t.done).length})</button>
-    <button class="modal-tab ${modalTab==='timeline'?'active':''}" onclick="setModalTab('timeline',${l.id})">📍 Timeline</button>
-    <button class="modal-tab ${modalTab==='credito'?'active':''}" onclick="setModalTab('credito',${l.id})">🏦 Crédito</button>
-    <button class="modal-tab ${modalTab==='financiamento'?'active':''}" onclick="setModalTab('financiamento',${l.id})">💰 Financiamento</button>
-    <button class="modal-tab ${modalTab==='documentos'?'active':''}" onclick="setModalTab('documentos',${l.id})">📎 Documentos</button>`;
+    <button class="modal-tab ${modalTab==='dados'?'active':''}" onclick="setModalTab('dados',${l.id})">Dados</button>
+    <button class="modal-tab ${modalTab==='tarefas'?'active':''}" onclick="setModalTab('tarefas',${l.id})">Tarefas (${tasks.filter(t=>!t.done).length})</button>
+    <button class="modal-tab ${modalTab==='timeline'?'active':''}" onclick="setModalTab('timeline',${l.id})">Timeline</button>
+    <button class="modal-tab ${modalTab==='credito'?'active':''}" onclick="setModalTab('credito',${l.id})">Crédito</button>
+    <button class="modal-tab ${modalTab==='financiamento'?'active':''}" onclick="setModalTab('financiamento',${l.id})">Financiamento</button>
+    <button class="modal-tab ${modalTab==='documentos'?'active':''}" onclick="setModalTab('documentos',${l.id})">Documentos</button>`;
 
   // Dados da ficha de financiamento (pré-preenchidos)
   const fin = l.ficha_fin || {};
@@ -2511,11 +2518,37 @@ function renderLeadModal(l){
     bodyHTML = `
       <div class="task-list">${tasks.map((t,i)=>`<div class="task-item">
         <div class="task-check ${t.done?'done':''}" onclick="toggleTask(${l.id},${i})">${t.done?'✓':''}</div>
-        <div class="task-info"><div class="task-title ${t.done?'done':''}">${t.title}</div><div class="task-meta ${t.due&&!t.done&&new Date(t.due)<new Date()?'overdue':''}">${t.resp||''}${t.due?' · '+new Date(t.due+'T00:00:00').toLocaleDateString('pt-BR'):''}</div></div>
+        <div class="task-info"><div class="task-title ${t.done?'done':''}">${t.title}</div><div class="task-meta ${isTaskLate(t)?'overdue':''}">${t.resp||''}${t.due?' · '+new Date(t.due+'T00:00:00').toLocaleDateString('pt-BR')+(t.time?' às '+t.time:''):''}</div></div>
         <button class="task-del" onclick="deleteTask(${l.id},${i})">🗑</button></div>`).join('')||'<div style="color:var(--muted);text-align:center;padding:20px;font-size:13px">Nenhuma tarefa</div>'}</div>
       <div class="divider"></div>
-      <div class="form-row"><label>Nova tarefa</label><input id="nt_title" placeholder="Descrição da tarefa..."></div>
-      <div class="form-grid"><div class="form-row"><label>Responsável</label><select id="nt_resp"><option value="SDR">SDR</option><option value="Luis Henrique">Luis Henrique</option><option value="Claudinei">Claudinei</option><option value="Financiamento">Financiamento</option></select></div><div class="form-row"><label>Data limite</label><input type="date" id="nt_due"></div></div>
+      <!-- SUGESTÕES DE TAREFA -->
+      <div style="margin-bottom:12px">
+        <div style="font-size:var(--text-xs);font-weight:700;color:var(--text-4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Sugestões rápidas</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          <button class="task-sugest" onclick="setTaskSugest('Retorno de ligação')">Retorno de ligação</button>
+          <button class="task-sugest" onclick="setTaskSugest('Enviar proposta por WhatsApp')">Enviar proposta</button>
+          <button class="task-sugest" onclick="setTaskSugest('Aguardando resposta do cliente')">Aguardando resposta</button>
+          <button class="task-sugest" onclick="setTaskSugest('Visita agendada na loja')">Visita na loja</button>
+          <button class="task-sugest" onclick="setTaskSugest('Visita agendada no pátio')">Visita no pátio</button>
+          <button class="task-sugest" onclick="setTaskSugest('Test drive agendado')">Test drive</button>
+          <button class="task-sugest" onclick="setTaskSugest('Aguardando aprovação do banco')">Aguardando banco</button>
+          <button class="task-sugest" onclick="setTaskSugest('Enviar documentos para análise')">Enviar documentos</button>
+          <button class="task-sugest" onclick="setTaskSugest('Apresentar nova proposta')">Nova proposta</button>
+          <button class="task-sugest" onclick="setTaskSugest('Negociar entrada')">Negociar entrada</button>
+          <button class="task-sugest" onclick="setTaskSugest('Fechar negócio')">Fechar negócio</button>
+        </div>
+      </div>
+      <div class="form-row"><label>Descrição da tarefa</label><input id="nt_title" placeholder="Ex: Ligar às 14h para confirmar visita..."></div>
+      <div class="form-grid">
+        <div class="form-row"><label>Responsável</label><select id="nt_resp"><option value="SDR">SDR</option><option value="Luis Henrique">Luis Henrique</option><option value="Claudinei">Claudinei</option><option value="Financiamento">Financiamento</option></select></div>
+        <div class="form-row"><label>Data limite</label><input type="date" id="nt_due"></div>
+      </div>
+      <div class="form-row"><label>Horário</label>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input type="time" id="nt_time" style="flex:1">
+          <span style="font-size:var(--text-xs);color:var(--text-3)">Tarefa só fica atrasada após este horário</span>
+        </div>
+      </div>
       <button class="btn btn-primary btn-sm" onclick="addTask(${l.id})">+ Adicionar tarefa</button>`;
   }
 
@@ -2989,12 +3022,44 @@ async function deleteTask(leadId,idx){
   await sb.from('leads').update({tasks}).eq('id',leadId);await loadAll();
   const l2=allLeads.find(x=>x.id===leadId);if(l2){modalTab='tarefas';renderLeadModal(l2);}
 }
+// Verifica se tarefa está atrasada respeitando horário
+function isTaskLate(t){
+  if(!t.due||t.done)return false;
+  const now=new Date();
+  const todayStr=now.toISOString().split('T')[0];
+  if(t.due>todayStr)return false; // data futura
+  if(t.due<todayStr)return true;  // data passada
+  // mesmo dia — verificar horário
+  if(t.time){
+    const [h,m]=(t.time||'00:00').split(':').map(Number);
+    const deadline=new Date();
+    deadline.setHours(h,m,0,0);
+    return now>deadline;
+  }
+  // sem horário definido: atrasa só no final do dia (23:59)
+  return false;
+}
+
 async function addTask(leadId){
-  const title=document.getElementById('nt_title')?.value.trim();if(!title)return;
+  const title=document.getElementById('nt_title')?.value.trim();if(!title)return alert('Digite a descrição da tarefa.');
   const l=allLeads.find(x=>x.id===leadId);if(!l)return;
-  const tasks=[...(l.tasks||[]),{title,resp:document.getElementById('nt_resp').value,due:document.getElementById('nt_due').value||null,done:false,criado:new Date().toISOString()}];
+  const due=document.getElementById('nt_due').value||null;
+  const time=document.getElementById('nt_time')?.value||null;
+  const tasks=[...(l.tasks||[]),{
+    title,
+    resp:document.getElementById('nt_resp').value,
+    due:due||null,
+    time:time||null,
+    done:false,
+    criado:new Date().toISOString()
+  }];
   await sb.from('leads').update({tasks}).eq('id',leadId);await loadAll();
   const l2=allLeads.find(x=>x.id===leadId);if(l2){modalTab='tarefas';renderLeadModal(l2);}
+}
+
+function setTaskSugest(text){
+  const el=document.getElementById('nt_title');
+  if(el){el.value=text;el.focus();}
 }
 
 function openCaminhaoModal(id){

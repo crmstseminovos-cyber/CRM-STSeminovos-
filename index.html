@@ -752,6 +752,47 @@ h1,h2,h3,h4,h5,.modal-head h3,.page-title,.page-header-title,.tk-title,.table-to
   cursor:pointer;transition:var(--t-fast);white-space:nowrap;
 }
 .task-sugest:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-subtle)}
+
+/* Sugestões recolhíveis */
+.sugest-toggle{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:7px 12px;border-radius:var(--r-md);
+  border:1px solid var(--border);background:var(--surface-2);
+  cursor:pointer;transition:var(--t-fast);margin-bottom:6px;
+  font-size:var(--text-xs);font-weight:700;color:var(--text-3);
+  text-transform:uppercase;letter-spacing:.8px;
+  user-select:none;
+}
+.sugest-toggle:hover{border-color:var(--border-2);color:var(--text-2)}
+.sugest-toggle-arrow{transition:transform .2s;font-size:10px}
+.sugest-toggle.open .sugest-toggle-arrow{transform:rotate(180deg)}
+.sugest-body{display:none;margin-bottom:10px}
+.sugest-body.open{display:flex;flex-wrap:wrap;gap:5px}
+
+/* Toast notifications */
+#toast-container{
+  position:fixed;bottom:24px;right:24px;
+  z-index:99999;display:flex;flex-direction:column;gap:8px;
+  pointer-events:none;
+}
+.toast{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 18px;border-radius:var(--r-lg);
+  font-size:var(--text-sm);font-weight:600;
+  box-shadow:var(--shadow-lg);
+  animation:toastIn .25s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:auto;min-width:220px;max-width:340px;
+}
+.toast.success{background:#052e16;border:1px solid rgba(0,230,118,.3);color:var(--accent)}
+.toast.error{background:#2d0a0a;border:1px solid var(--red-border);color:var(--red)}
+.toast.info{background:var(--surface-2);border:1px solid var(--border-2);color:var(--text)}
+.toast.warning{background:#1c1200;border:1px solid var(--amber-border);color:var(--amber)}
+.toast-icon{font-size:16px;flex-shrink:0}
+.toast-msg{flex:1}
+.toast-close{background:transparent;border:none;color:inherit;opacity:.5;cursor:pointer;font-size:14px;padding:0 2px}
+.toast-close:hover{opacity:1}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(20px)}}
 .task-list{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
 .task-item{
   display:flex;align-items:flex-start;gap:9px;
@@ -1005,6 +1046,7 @@ tr:last-child td{border-bottom:none}
 </style>
 </head>
 <body>
+<div id="toast-container"></div>
 <div id="loginPage" class="login-page">
   <div class="login-card">
     <div class="login-logo"><img src="logo.png" alt="ST" onerror="this.style.display='none'"></div>
@@ -1670,7 +1712,7 @@ function scoreLabel(s){return s>=70?'Forte':s>=40?'Médio':'Fraco';}
 function abrirWhatsApp(tel,nome,interesse,e){
   if(e){e.stopPropagation();e.preventDefault();}
   const num=(tel||'').replace(/\D/g,'');
-  if(!num){alert('Lead sem telefone cadastrado.');return;}
+  if(!num){showToast('Lead sem telefone cadastrado','warning');return;}
   const fullNum=num.startsWith('55')?num:'55'+num;
   const msg=encodeURIComponent(`Olá ${nome||''}! Tudo bem? Sou da ST Seminovos e gostaria de conversar sobre ${interesse||'um veículo do seu interesse'}. Posso te ajudar?`);
   window.open(`https://wa.me/${fullNum}?text=${msg}`,'_blank');
@@ -1775,7 +1817,7 @@ async function onColDrop(e,colId){
   hist.push({msg:`${nomeQuemMoveu}: ${colLabel(etapaAtual)||'—'} → ${colLabel(colId)}`,data:new Date().toISOString(),tipo:perfil==='gerente'?'amber':'green'});
   const updateObj={[campoEtapa]:colId,historico:hist};
   const{error}=await sb.from('leads').update(updateObj).eq('id',leadId);
-  if(error){alert('Erro ao mover lead: '+error.message);return;}
+  if(error){showToast('Erro ao mover lead: '+error.message,'error');return;}
   dragLeadId=null;
   await loadAll();
 }
@@ -2173,7 +2215,7 @@ async function salvarTaskModal(src,leadId,idx){
   const tasks=[...(l.tasks||[])];
   if(obs) tasks[idx]={...tasks[idx],obs};
   if(novaData) tasks[idx]={...tasks[idx],due:novaData};
-  if(obs||novaData){await sb.from('leads').update({tasks}).eq('id',leadId);await loadAll();}
+  if(obs||novaData){await sb.from('leads').update({tasks}).eq('id',leadId);showToast('Tarefa adicionada com sucesso!');await loadAll();}
 }
 function toggleTaskPanel(){}
 function mostrarAdiar(){}
@@ -2190,7 +2232,7 @@ async function toggleDayTask(src,leadId,idx){
   if(src==='quick'){quickTasks[idx]={...quickTasks[idx],done:!quickTasks[idx].done};localStorage.setItem('st_qtasks',JSON.stringify(quickTasks));renderDayTasks();renderCalendar();return;}
   const l=allLeads.find(x=>x.id===leadId);if(!l)return;
   const tasks=[...(l.tasks||[])];tasks[idx]={...tasks[idx],done:!tasks[idx].done};
-  await sb.from('leads').update({tasks}).eq('id',leadId);await loadAll();
+  await sb.from('leads').update({tasks}).eq('id',leadId);showToast('Tarefa adicionada com sucesso!');await loadAll();
 }
 function addQuickTask(){
   const title=document.getElementById('qt_title')?.value.trim();if(!title)return;
@@ -2407,7 +2449,7 @@ function selTemp(el,val){
   const t=document.getElementById('nl_temp')||document.getElementById('el_temp');if(t)t.value=val;
 }
 async function saveLead(){
-  const nome=document.getElementById('nl_nome').value.trim();if(!nome)return alert('Informe o nome.');
+  const nome=document.getElementById('nl_nome').value.trim();if(!nome){showToast('Informe o nome do lead','warning');return;}
   const tel=document.getElementById('nl_tel').value.trim();
   // Verificar duplicata por telefone
   if(tel){
@@ -2439,7 +2481,7 @@ async function saveLead(){
     historico:hist,
     tasks:[]
   };
-  const{error}=await sb.from('leads').insert(obj);if(error)return alert('Erro: '+error.message);
+  const{error}=await sb.from('leads').insert(obj);if(error){showToast('Erro ao salvar: '+error.message,'error');return;}
   closeModal();await loadAll();
 }
 
@@ -2521,22 +2563,23 @@ function renderLeadModal(l){
         <div class="task-info"><div class="task-title ${t.done?'done':''}">${t.title}</div><div class="task-meta ${isTaskLate(t)?'overdue':''}">${t.resp||''}${t.due?' · '+new Date(t.due+'T00:00:00').toLocaleDateString('pt-BR')+(t.time?' às '+t.time:''):''}</div></div>
         <button class="task-del" onclick="deleteTask(${l.id},${i})">🗑</button></div>`).join('')||'<div style="color:var(--muted);text-align:center;padding:20px;font-size:13px">Nenhuma tarefa</div>'}</div>
       <div class="divider"></div>
-      <!-- SUGESTÕES DE TAREFA -->
-      <div style="margin-bottom:12px">
-        <div style="font-size:var(--text-xs);font-weight:700;color:var(--text-4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Sugestões rápidas</div>
-        <div style="display:flex;flex-wrap:wrap;gap:5px">
-          <button class="task-sugest" onclick="setTaskSugest('Retorno de ligação')">Retorno de ligação</button>
-          <button class="task-sugest" onclick="setTaskSugest('Enviar proposta por WhatsApp')">Enviar proposta</button>
-          <button class="task-sugest" onclick="setTaskSugest('Aguardando resposta do cliente')">Aguardando resposta</button>
-          <button class="task-sugest" onclick="setTaskSugest('Visita agendada na loja')">Visita na loja</button>
-          <button class="task-sugest" onclick="setTaskSugest('Visita agendada no pátio')">Visita no pátio</button>
-          <button class="task-sugest" onclick="setTaskSugest('Test drive agendado')">Test drive</button>
-          <button class="task-sugest" onclick="setTaskSugest('Aguardando aprovação do banco')">Aguardando banco</button>
-          <button class="task-sugest" onclick="setTaskSugest('Enviar documentos para análise')">Enviar documentos</button>
-          <button class="task-sugest" onclick="setTaskSugest('Apresentar nova proposta')">Nova proposta</button>
-          <button class="task-sugest" onclick="setTaskSugest('Negociar entrada')">Negociar entrada</button>
-          <button class="task-sugest" onclick="setTaskSugest('Fechar negócio')">Fechar negócio</button>
-        </div>
+      <!-- SUGESTÕES RECOLHÍVEIS -->
+      <div class="sugest-toggle" onclick="toggleSugest(this)">
+        <span>Sugestões rápidas</span>
+        <span class="sugest-toggle-arrow">▼</span>
+      </div>
+      <div class="sugest-body">
+        <button class="task-sugest" onclick="setTaskSugest('Retorno de ligação')">Retorno de ligação</button>
+        <button class="task-sugest" onclick="setTaskSugest('Enviar proposta por WhatsApp')">Enviar proposta</button>
+        <button class="task-sugest" onclick="setTaskSugest('Aguardando resposta do cliente')">Aguardando resposta</button>
+        <button class="task-sugest" onclick="setTaskSugest('Visita agendada na loja')">Visita na loja</button>
+        <button class="task-sugest" onclick="setTaskSugest('Visita agendada no pátio')">Visita no pátio</button>
+        <button class="task-sugest" onclick="setTaskSugest('Test drive agendado')">Test drive</button>
+        <button class="task-sugest" onclick="setTaskSugest('Aguardando aprovação do banco')">Aguardando banco</button>
+        <button class="task-sugest" onclick="setTaskSugest('Enviar documentos para análise')">Enviar documentos</button>
+        <button class="task-sugest" onclick="setTaskSugest('Apresentar nova proposta')">Nova proposta</button>
+        <button class="task-sugest" onclick="setTaskSugest('Negociar entrada')">Negociar entrada</button>
+        <button class="task-sugest" onclick="setTaskSugest('Fechar negócio')">Fechar negócio</button>
       </div>
       <div class="form-row"><label>Descrição da tarefa</label><input id="nt_title" placeholder="Ex: Ligar às 14h para confirmar visita..."></div>
       <div class="form-grid">
@@ -2812,7 +2855,7 @@ async function enviarParaFinanciamento(id){
       historico:hist
     })
   });
-  if(!res.ok){const t=await res.text();alert('Erro: '+t);return;}
+  if(!res.ok){const t=await res.text();showToast('Erro: '+t,'error');return;}
   closeModal();
   await loadAll();
 }
@@ -2855,7 +2898,7 @@ async function salvarFichaFin(id){
     },
     body:JSON.stringify({ficha_fin:ficha,historico:hist})
   });
-  if(!res.ok){const t=await res.text();alert('Erro ao salvar ficha: '+t);return;}
+  if(!res.ok){const t=await res.text();showToast('Erro ao salvar ficha: '+t);return;}
   // Feedback visual
   const btn=document.querySelector('.modal-footer .btn-primary');
   if(btn){const orig=btn.textContent;btn.textContent='✅ Salvo!';btn.style.background='#00c853';setTimeout(()=>{btn.textContent=orig;btn.style.background='';},2000);}
@@ -2923,7 +2966,7 @@ async function uploadDocsFiles(files,leadId){
   if(ok>0)hist.push({msg:`${PERFIS[perfil]?.name||perfil}: ${ok} documento(s) enviado(s) — ${categoria}`,data:new Date().toISOString(),tipo:'blue'});
   const{error}=await sb.from('leads').update({documentos:docs,historico:hist}).eq('id',leadId);
   if(prog)prog.classList.remove('show');
-  if(error){alert('Erro ao salvar documentos: '+error.message);return;}
+  if(error){showToast('Erro ao salvar documentos','error');return;}
   await loadAll();
   const l2=allLeads.find(x=>x.id===leadId);
   if(l2){modalTab='documentos';renderLeadModal(l2);}
@@ -2971,7 +3014,7 @@ async function deletarDoc(leadId,idx){
   }
   docs.splice(idx,1);
   const{error}=await sb.from('leads').update({documentos:docs}).eq('id',leadId);
-  if(error){alert('Erro: '+error.message);return;}
+  if(error){showToast('Erro: '+error.message,'error');return;}
   await loadAll();
   const l2=allLeads.find(x=>x.id===leadId);
   if(l2){modalTab='documentos';renderLeadModal(l2);}
@@ -3007,19 +3050,19 @@ async function updateLead(id){
     historico:hist
   };
   const{error}=await sb.from('leads').update(obj).eq('id',id);
-  if(error)return alert('Erro: '+error.message);
+  if(error){showToast('Erro ao salvar: '+error.message,'error');return;}
   closeModal();await loadAll();
 }
 async function toggleTask(leadId,idx){
   const l=allLeads.find(x=>x.id===leadId);if(!l)return;
   const tasks=[...(l.tasks||[])];tasks[idx]={...tasks[idx],done:!tasks[idx].done};
-  await sb.from('leads').update({tasks}).eq('id',leadId);await loadAll();modalTab='tarefas';
+  await sb.from('leads').update({tasks}).eq('id',leadId);showToast('Tarefa adicionada com sucesso!');await loadAll();modalTab='tarefas';
   const l2=allLeads.find(x=>x.id===leadId);if(l2)renderLeadModal(l2);
 }
 async function deleteTask(leadId,idx){
   const l=allLeads.find(x=>x.id===leadId);if(!l)return;
   const tasks=[...(l.tasks||[])];tasks.splice(idx,1);
-  await sb.from('leads').update({tasks}).eq('id',leadId);await loadAll();
+  await sb.from('leads').update({tasks}).eq('id',leadId);showToast('Tarefa adicionada com sucesso!');await loadAll();
   const l2=allLeads.find(x=>x.id===leadId);if(l2){modalTab='tarefas';renderLeadModal(l2);}
 }
 // Verifica se tarefa está atrasada respeitando horário
@@ -3041,7 +3084,7 @@ function isTaskLate(t){
 }
 
 async function addTask(leadId){
-  const title=document.getElementById('nt_title')?.value.trim();if(!title)return alert('Digite a descrição da tarefa.');
+  const title=document.getElementById('nt_title')?.value.trim();if(!title){showToast('Digite a descrição da tarefa','warning');return;}
   const l=allLeads.find(x=>x.id===leadId);if(!l)return;
   const due=document.getElementById('nt_due').value||null;
   const time=document.getElementById('nt_time')?.value||null;
@@ -3053,13 +3096,41 @@ async function addTask(leadId){
     done:false,
     criado:new Date().toISOString()
   }];
-  await sb.from('leads').update({tasks}).eq('id',leadId);await loadAll();
+  await sb.from('leads').update({tasks}).eq('id',leadId);showToast('Tarefa adicionada com sucesso!');await loadAll();
   const l2=allLeads.find(x=>x.id===leadId);if(l2){modalTab='tarefas';renderLeadModal(l2);}
+}
+
+// ── TOAST NOTIFICATIONS ──
+function showToast(msg, type='success', duration=3000){
+  const container=document.getElementById('toast-container');
+  if(!container)return;
+  const icons={success:'✓',error:'✕',info:'ℹ',warning:'⚠'};
+  const toast=document.createElement('div');
+  toast.className='toast '+type;
+  toast.innerHTML=`<span class="toast-icon">${icons[type]||'✓'}</span><span class="toast-msg">${msg}</span><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+  container.appendChild(toast);
+  setTimeout(()=>{
+    toast.style.animation='toastOut .25s ease forwards';
+    setTimeout(()=>toast.remove(), 250);
+  }, duration);
+}
+
+function toggleSugest(el){
+  el.classList.toggle('open');
+  const body=el.nextElementSibling;
+  if(body)body.classList.toggle('open');
 }
 
 function setTaskSugest(text){
   const el=document.getElementById('nt_title');
-  if(el){el.value=text;el.focus();}
+  if(el){
+    el.value=text;el.focus();
+    // Fechar sugestões após clicar
+    const body=document.querySelector('.sugest-body.open');
+    const toggle=document.querySelector('.sugest-toggle.open');
+    if(body)body.classList.remove('open');
+    if(toggle)toggle.classList.remove('open');
+  }
 }
 
 function openCaminhaoModal(id){
@@ -3126,12 +3197,12 @@ async function buscarPlaca(){
   btn.textContent='Buscar';btn.disabled=false;
 }
 async function saveCaminhao(id){
-  const modelo=document.getElementById('cm_modelo').value.trim();if(!modelo)return alert('Informe o modelo.');
+  const modelo=document.getElementById('cm_modelo').value.trim();if(!modelo){showToast('Informe o modelo do veículo','warning');return;}
   const obj={modelo,placa:document.getElementById('cm_placa').value,ano:document.getElementById('cm_ano').value||null,cor:document.getElementById('cm_cor')?.value||null,valor:document.getElementById('cm_valor').value||null,fipe_valor:document.getElementById('cm_fipe_valor')?.value||null,fipe_codigo:document.getElementById('cm_fipe_codigo')?.value||null,status:document.getElementById('cm_status').value,observacoes:document.getElementById('cm_obs').value};
   let error;
   if(id){({error}=await sb.from('caminhoes').update(obj).eq('id',id));}
   else{({error}=await sb.from('caminhoes').insert(obj));}
-  if(error)return alert('Erro: '+error.message);
+  if(error){showToast('Erro ao salvar: '+error.message,'error');return;}
   closeModal();await loadAll();renderEstoque();
 }
 async function mudarStatusCam(id){
@@ -3151,7 +3222,7 @@ async function setStatusCam(id,status){
 
 // ── EXPORTAR ──
 function exportLeads(){
-  if(!allLeads.length){alert("Nenhum lead para exportar.");return;}
+  if(!allLeads.length){showToast("Nenhum lead para exportar","warning");return;}
   var nl=String.fromCharCode(13,10);
   var hdr="Nome,Telefone,Interesse,Origem,Etapa,Temperatura,Vendedor,Observacoes";
   var body=allLeads.map(function(l){
@@ -3289,7 +3360,7 @@ async function confirmImport(){
   }
   closeModal();
   await loadAll();
-  alert(ok+' lead'+(ok>1?'s':'')+' importado'+(ok>1?'s':'')+' com sucesso!'+(err>0?' ('+err+' com erro)':''));
+  showToast(ok+' lead'+(ok>1?'s':'')+' importado'+(ok>1?'s':'')+' com sucesso!'+(err>0?' ('+err+' com erro)':''));
 }
 
 // ── GERENTE VIEW SWITCHER ──
@@ -3391,7 +3462,7 @@ function selMotivo(el,motivo){
 
 async function confirmarEncerramento(leadId,colId,campoEtapa){
   const motivo=document.getElementById('enc_motivo')?.value;
-  if(!motivo){alert('Selecione um motivo!');return;}
+  if(!motivo){showToast('Selecione um motivo!','warning');return;}
   const l=allLeads.find(x=>x.id===leadId);if(!l)return;
   const hist=[...(l.historico||[])];
   const motivoLabels={
@@ -3416,7 +3487,7 @@ async function confirmarEncerramento(leadId,colId,campoEtapa){
     enc.loja=document.getElementById('enc_loja')?.value||'';
     enc.cam_comprado=document.getElementById('enc_cam_comprado')?.value||'';
     enc.valor_comprado=document.getElementById('enc_valor_comprado')?.value||'';
-    if(!enc.loja){alert('Informe o nome da loja!');return;}
+    if(!enc.loja){showToast('Informe o nome da loja!','warning');return;}
   }
   if(motivo==='outro'){
     enc.descricao=document.getElementById('enc_outro_desc')?.value||'';
@@ -3432,7 +3503,7 @@ async function confirmarEncerramento(leadId,colId,campoEtapa){
     headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
     body:JSON.stringify(updateObj)
   });
-  if(!res.ok){const t=await res.text();alert('Erro: '+t);return;}
+  if(!res.ok){const t=await res.text();showToast('Erro: '+t,'error');return;}
   closeModal();
   await loadAll();
 }
@@ -3497,7 +3568,7 @@ async function reativarCliente(id){
     headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
     body:JSON.stringify({etapa:'novo',etapa_vend:null,vendedor:null,na_base_clientes:false,historico:hist})
   });
-  if(!res.ok){const t=await res.text();alert('Erro: '+t);return;}
+  if(!res.ok){const t=await res.text();showToast('Erro: '+t,'error');return;}
   await loadAll();
   // Navegar para o SDR
   navTo('page-sdr',null);
@@ -3800,7 +3871,7 @@ async function salvarAnaliseCredito(leadId){
   });
   if(!res.ok){alert('Erro: '+(await res.text()));return;}
   l.analise_credito=analise;l.historico=hist;
-  alert('Análise de crédito salva com sucesso!');
+  showToast('Análise de crédito salva!');
   renderLeadModal(l);
 }
 

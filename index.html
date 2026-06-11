@@ -2172,6 +2172,7 @@ function gerarPDFFicha(id){
   const fmtData=(v)=>{if(!v)return'—';try{return new Date(v+'T00:00:00').toLocaleDateString('pt-BR');}catch(e){return v;}};
   const fmtValor=(v)=>{if(!v)return'—';const n=parseFloat(v);if(isNaN(n))return v;return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
 
+  const camposExtras=JSON.parse(localStorage.getItem('fin_campos_extras')||'[]');
   const html=`<!DOCTYPE html><html><head><meta charset="utf-8">
   <title>Ficha - ${fmt(f.nome||l.nome)}</title>
   <style>
@@ -2184,7 +2185,6 @@ function gerarPDFFicha(id){
     .section{margin-bottom:20px}
     .section-title{font-size:11px;font-weight:800;color:#0a1628;text-transform:uppercase;letter-spacing:1.5px;padding:6px 12px;background:#f0f7ff;border-left:4px solid #00c853;border-radius:0 8px 8px 0;margin-bottom:12px}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
     .field{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px 13px}
     .field label{font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:3px}
     .field span{font-size:13px;font-weight:600;color:#1a1a2e}
@@ -2209,29 +2209,48 @@ function gerarPDFFicha(id){
       <div class="field full"><label>Nome completo</label><span>${fmt(f.nome||l.nome)}</span></div>
       <div class="field"><label>CPF</label><span>${fmt(f.cpf)}</span></div>
       <div class="field"><label>RG</label><span>${fmt(f.rg)}</span></div>
-      <div class="field"><label>Data de emissão RG</label><span>${fmtData(f.rg_emissao)}</span></div>
       <div class="field"><label>Data de nascimento</label><span>${fmtData(f.nascimento)}</span></div>
-      <div class="field"><label>Local de nascimento / UF</label><span>${fmt(f.naturalidade)}</span></div>
-      <div class="field full"><label>Nome da mãe</label><span>${fmt(f.mae)}</span></div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">🏡 Endereço Residencial</div>
-    <div class="grid">
-      <div class="field full"><label>Rua / Endereço</label><span>${fmt(f.rua)}</span></div>
+      <div class="field"><label>Nome da mãe</label><span>${fmt(f.mae)}</span></div>
+      <div class="field"><label>Nome do pai</label><span>${fmt(f.pai)}</span></div>
       <div class="field"><label>CEP</label><span>${fmt(f.cep)}</span></div>
+      <div class="field"><label>Número</label><span>${fmt(f.numero)}</span></div>
       <div class="field"><label>Bairro</label><span>${fmt(f.bairro)}</span></div>
+      <div class="field full"><label>Rua / Endereço</label><span>${fmt(f.rua)}</span></div>
       <div class="field"><label>Cidade</label><span>${fmt(f.cidade)}</span></div>
       <div class="field"><label>Estado</label><span>${fmt(f.estado)}</span></div>
+      <div class="field"><label>Celular</label><span>${fmt(f.celular||l.telefone)}</span></div>
+      <div class="field"><label>E-mail</label><span>${fmt(f.email)}</span></div>
+      <div class="field"><label>Tem CNH?</label><span>${fmt(f.cnh)}</span></div>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-title">📱 Contato</div>
+    <div class="section-title">💼 Dados Profissionais</div>
     <div class="grid">
-      <div class="field"><label>Celular</label><span>${fmt(f.celular||l.telefone)}</span></div>
-      <div class="field"><label>E-mail</label><span>${fmt(f.email)}</span></div>
+      <div class="field full"><label>Nome da empresa</label><span>${fmt(f.empresa)}</span></div>
+      <div class="field full"><label>Endereço da empresa</label><span>${fmt(f.empresa_end)}</span></div>
+      <div class="field"><label>Telefone da empresa</label><span>${fmt(f.empresa_tel)}</span></div>
+      <div class="field"><label>Cargo</label><span>${fmt(f.cargo)}</span></div>
+      <div class="field"><label>Renda</label><span>${fmt(f.renda)}</span></div>
+      <div class="field"><label>Data de admissão</label><span>${fmtData(f.admissao)}</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">👥 Referências Pessoais</div>
+    <div class="grid">
+      <div class="field"><label>Nome — Referência 1</label><span>${fmt(f.ref1_nome)}</span></div>
+      <div class="field"><label>Telefone — Referência 1</label><span>${fmt(f.ref1_tel)}</span></div>
+      <div class="field"><label>Nome — Referência 2</label><span>${fmt(f.ref2_nome)}</span></div>
+      <div class="field"><label>Telefone — Referência 2</label><span>${fmt(f.ref2_tel)}</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">ℹ️ Informações Complementares</div>
+    <div class="grid">
+      <div class="field"><label>Tem renda extra?</label><span>${fmt(f.renda_extra)}</span></div>
+      <div class="field full"><label>Autônomo / Empresário — atividade</label><span>${fmt(f.autonomo)}</span></div>
     </div>
   </div>
 
@@ -2244,6 +2263,10 @@ function gerarPDFFicha(id){
       <div class="field"><label>Valor</label><span>${fmtValor(f.veiculo_valor)}</span></div>
     </div>
   </div>
+
+  ${camposExtras.length ? `<div class="section"><div class="section-title">📋 Campos Personalizados</div><div class="grid">`
+    + camposExtras.map(c=>`<div class="field"><label>${c.label}</label><span>${fmt(f[c.id])}</span></div>`).join('')
+    + `</div></div>` : ''}
 
   <div class="assinaturas">
     <div><div class="assinatura">Assinatura do Cliente</div></div>
@@ -3063,7 +3086,7 @@ async function salvarFichaFin(id){
       'Content-Type':'application/json',
       'Prefer':'return=minimal'
     },
-    body:JSON.stringify({ficha_fin:ficha,ficha_fin_extra:finExtraData,historico:hist})
+    body:JSON.stringify({ficha_fin:{...ficha,...finExtraData},historico:hist})
   });
   if(!res.ok){const t=await res.text();showToast('Erro ao salvar ficha: '+t);return;}
   // Feedback visual

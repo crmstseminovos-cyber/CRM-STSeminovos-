@@ -1728,6 +1728,29 @@ function fmtBRL(v){return'R$ '+Number(v).toLocaleString('pt-BR')}
 
 let dragLeadId=null,gerenteViewAtual='geral';
 
+function calcScore(l){
+  let s=0;
+  if(l.temperatura==='hot')s+=30;
+  else if(l.temperatura==='warm')s+=15;
+  if(l.ultimo_contato){const h=(Date.now()-new Date(l.ultimo_contato))/36e5;if(h<2)s+=25;else if(h<24)s+=15;else if(h<72)s+=5;}
+  if((l.documentos||[]).length>0)s+=20;
+  if(l.ficha_fin)s+=15;
+  if((l.tasks||[]).some(t=>t.title&&(t.title.toLowerCase().includes('visita')||t.title.toLowerCase().includes('simulação')||t.title.toLowerCase().includes('proposta'))))s+=10;
+  if(l.vendedor)s+=5;
+  return Math.min(s,100);
+}
+function scoreClass(s){return s>=70?'strong':s>=40?'medium':'weak';}
+function scoreLabel(s){return s>=70?'Forte':s>=40?'Médio':'Fraco';}
+
+function abrirWhatsApp(tel,nome,interesse,e){
+  if(e){e.stopPropagation();e.preventDefault();}
+  const num=(tel||'').replace(/\D/g,'');
+  if(!num){showToast('Lead sem telefone cadastrado','warning');return;}
+  const fullNum=num.startsWith('55')?num:'55'+num;
+  const msg=encodeURIComponent(`Olá ${nome||''}! Tudo bem? Sou da ST Seminovos e gostaria de conversar sobre ${interesse||'um veículo do seu interesse'}. Posso te ajudar?`);
+  window.open(`https://wa.me/${fullNum}?text=${msg}`,'_blank');
+}
+
 function getTaskPriority(l){
   const tasks=(l.tasks||[]).filter(t=>!t.done&&t.due);
   if(!tasks.length) return {level:3, task:null};
@@ -1763,6 +1786,14 @@ function fmtTaskAlert(tp){
     return `<div class="card-task-alert future"><div class="card-task-alert-dot"></div>${fmtDate2(t.due)}${timeStr} · ${t.title}</div>`;
   }
   return '';
+}
+
+function fmtUltimoContato(l){
+  const d=l.ultimo_contato;if(!d)return null;
+  const h=Math.floor((Date.now()-new Date(d))/36e5);
+  if(h<1)return'Agora mesmo';if(h<24)return`${h}h atrás`;
+  const days=Math.floor(h/24);if(days<7)return`${days}d atrás`;
+  return new Date(d).toLocaleDateString('pt-BR');
 }
 
 function cardHTML(l){

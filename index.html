@@ -2643,6 +2643,7 @@ function renderLeadModal(l){
         </select>
       </div>
       <div class="form-grid"><div class="form-row"><label>Nome</label><input id="el_nome" value="${l.nome||''}"></div><div class="form-row"><label>Telefone</label><input id="el_tel" value="${l.telefone||''}"></div></div>
+      <div class="form-grid"><div class="form-row"><label>E-mail</label><input id="el_email" type="email" value="${l.email||''}" placeholder="email@exemplo.com"></div><div class="form-row"><label>CPF</label><input id="el_cpf" value="${l.cpf||''}" placeholder="000.000.000-00"></div></div>
       <div class="form-row"><label>Interesse</label><input id="el_int" value="${l.interesse||''}"></div>
       <div class="form-grid"><div class="form-row"><label>Origem</label><select id="el_orig"><option>Meta Ads</option><option>WhatsApp direto</option><option>Instagram</option><option>Indicação</option><option>Mercado Livre</option><option>Caminhões e Carretas</option><option>OLX</option></select></div><div class="form-row"><label>Vendedor</label><select id="el_vend">${vendOpts}</select></div></div>
       <div class="form-grid3"><div class="form-row"><label>Etapa SDR</label><select id="el_etapa">${colsSDR}</select></div><div class="form-row"><label>Etapa Vendedor</label><select id="el_etapa_vend">${colsVend}</select></div><div class="form-row"><label>Etapa Fin.</label><select id="el_etapa_fin">${colsFin}</select></div></div>
@@ -3212,6 +3213,8 @@ async function updateLead(id){
     ultimo_contato:document.getElementById('el_ultimo').value||null,
     veiculo_id:document.getElementById('el_veiculo').value||null,
     observacoes:document.getElementById('el_obs').value,
+    email:document.getElementById('el_email')?.value||null,
+    cpf:document.getElementById('el_cpf')?.value||null,
     prox_acao:document.getElementById('el_prox_acao')?.value||null,
     data_entrega_veiculo:document.getElementById('el_data_entrega')?.value||l.data_entrega_veiculo||null,
     historico:hist

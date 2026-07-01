@@ -1631,7 +1631,7 @@ const COLS_DEF={
   financiamento:[{id:'aguardando_docs',label:'📄 Aguard. docs',cor:'#f59e0b'},{id:'preenchimento',label:'📝 Preench. ficha',cor:'#3b82f6'},{id:'aguardando_resp',label:'⏳ Aguard. resposta',cor:'#8b5cf6'},{id:'pendencia',label:'🔄 Pendência',cor:'#f97316'},{id:'aprovado',label:'✅ Aprovado',cor:'#00c853'},{id:'aprovado_restricao',label:'⚠️ Aprov. c/ restrição',cor:'#eab308'},{id:'reprovado',label:'Reprovado',cor:'#ef4444'}]
 };
 let perfil=null,allLeads=[],allCam=[],activeDept='sdr',modalTab='dados';
-let colunas=JSON.parse(localStorage.getItem('st_colunas')||'null')||COLS_DEF;
+let colunas=JSON.parse(JSON.stringify(COLS_DEF));
 let tkFilter='hoje',calOffset=0,calSelDay=null;
 let quickTasks=JSON.parse(localStorage.getItem('st_qtasks')||'[]');
 let toolsOpen=true;
@@ -1651,6 +1651,8 @@ function login(p){
   const td=document.getElementById('qt_due');if(td)td.value=new Date().toISOString().split('T')[0];
   // Carregar configurações do perfil logado
   loadSettings();
+  // Carregar a ordem de colunas salva para ESTE perfil (cada pessoa tem a sua própria ordem)
+  colunas=JSON.parse(localStorage.getItem(cfgKey('st_colunas'))||'null')||JSON.parse(JSON.stringify(COLS_DEF));
   loadAll();renderCalendar();
 }
 function logout(){perfil=null;document.getElementById('loginPage').classList.remove('hidden');document.getElementById('appPage').classList.add('hidden');}
@@ -2519,10 +2521,10 @@ function setDept(d){activeDept=d;renderAdmColunas();}
 function addColuna(){
   const nome=document.getElementById('novaColNome').value.trim(),cor=document.getElementById('novaColCor').value;if(!nome)return;
   colunas[activeDept].push({id:nome.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,''),label:nome,cor});
-  localStorage.setItem('st_colunas',JSON.stringify(colunas));document.getElementById('novaColNome').value='';renderAdmColunas();
+  localStorage.setItem(cfgKey('st_colunas'),JSON.stringify(colunas));document.getElementById('novaColNome').value='';renderAdmColunas();
 }
-function removeCol(i){if(!confirm('Remover?'))return;colunas[activeDept].splice(i,1);localStorage.setItem('st_colunas',JSON.stringify(colunas));renderAdmColunas();}
-function moveCol(i,dir){const a=colunas[activeDept],t=a[i];a[i]=a[i+dir];a[i+dir]=t;localStorage.setItem('st_colunas',JSON.stringify(colunas));renderAdmColunas();}
+function removeCol(i){if(!confirm('Remover?'))return;colunas[activeDept].splice(i,1);localStorage.setItem(cfgKey('st_colunas'),JSON.stringify(colunas));renderAdmColunas();}
+function moveCol(i,dir){const a=colunas[activeDept],t=a[i];a[i]=a[i+dir];a[i+dir]=t;localStorage.setItem(cfgKey('st_colunas'),JSON.stringify(colunas));renderAdmColunas();}
 
 function renderEstoque(){
   const filtro=document.getElementById('filtroStatus')?.value||'';
@@ -4260,10 +4262,12 @@ function abrirCfgColunas(dept){
 
 function moverColCfg(i,dir){
   const cols=window.cols_temp;
+  // Salvar eventuais edições de texto feitas nos campos ANTES de reordenar,
+  // enquanto o índice dos inputs no DOM ainda corresponde à ordem atual de cols.
+  const listaAntes=document.getElementById('cfgColLista');
+  if(listaAntes){listaAntes.querySelectorAll('.cfg-col-input').forEach((inp,idx)=>{if(cols[idx])cols[idx].label=inp.value;});}
+  // Agora sim, trocar a posição dos itens (já com os labels corretos anexados a cada um)
   const t=cols[i];cols[i]=cols[i+dir];cols[i+dir]=t;
-  // Reler labels dos inputs antes de re-renderizar
-  const lista=document.getElementById('cfgColLista');
-  if(lista){lista.querySelectorAll('.cfg-col-input').forEach((inp,idx)=>{if(cols[idx])cols[idx].label=inp.value;});}
   const renderLista=()=>{
     const lista2=document.getElementById('cfgColLista');if(!lista2)return;
     lista2.innerHTML=cols.map((c,i2)=>`
@@ -4353,7 +4357,7 @@ async function salvarCfgColunas(){
   const lista=document.getElementById('cfgColLista');
   if(lista)lista.querySelectorAll('.cfg-col-input').forEach((inp,i)=>{if(cols[i])cols[i].label=inp.value;});
   colunas[dept]=cols;
-  localStorage.setItem('st_colunas',JSON.stringify(colunas));
+  localStorage.setItem(cfgKey('st_colunas'),JSON.stringify(colunas));
   // Mover leads se necessário
   const paraMove=window.leads_para_mover||[];
   for(const mv of paraMove){

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ST Seminovos — CRM v3</title>
+<title>LH Seminovos — CRM v3</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Urbanist:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
@@ -1121,13 +1121,12 @@ tr:last-child td{border-bottom:none}
 <div id="toast-container"></div>
 <div id="loginPage" class="login-page">
   <div class="login-card">
-    <div class="login-logo"><img src="logo.png" alt="ST" onerror="this.style.display='none'"></div>
-    <div class="login-title">ST Seminovos CRM</div>
+    <div class="login-logo"><img src="logo.png" alt="LH" onerror="this.style.display='none'"></div>
+    <div class="login-title">LH Seminovos CRM</div>
     <div class="login-sub">Selecione seu perfil para entrar</div>
     <div class="perfil-list">
       <div class="perfil-item" onclick="login('sdr')"><div class="perfil-avatar" style="background:#3b82f6">SD</div><div class="perfil-info"><div class="pname">SDR</div><div class="prole">Qualificação de leads</div></div></div>
       <div class="perfil-item" onclick="login('luis')"><div class="perfil-avatar" style="background:#00c853">LH</div><div class="perfil-info"><div class="pname">Luis Henrique</div><div class="prole">Vendedor</div></div></div>
-      <div class="perfil-item" onclick="login('claudinei')"><div class="perfil-avatar" style="background:#8b5cf6">CL</div><div class="perfil-info"><div class="pname">Claudinei</div><div class="prole">Vendedor</div></div></div>
       <div class="perfil-item" onclick="login('financiamento')"><div class="perfil-avatar" style="background:#14b8a6">FI</div><div class="perfil-info"><div class="pname">Financiamento</div><div class="prole">Análise e aprovação</div></div></div>
       <div class="perfil-item" onclick="login('gerente')"><div class="perfil-avatar" style="background:#f59e0b">GR</div><div class="perfil-info"><div class="pname">Gerente</div><div class="prole">Visão geral</div></div></div>
       <div class="perfil-item" onclick="login('adm')"><div class="perfil-avatar" style="background:#0a1628">AD</div><div class="perfil-info"><div class="pname">ADM</div><div class="prole">Administrador do sistema</div></div></div>
@@ -1137,7 +1136,7 @@ tr:last-child td{border-bottom:none}
 <div id="appPage" class="app hidden">
   <div class="topbar">
     <div class="topbar-left">
-      <img src="logo.png" alt="ST" onerror="this.style.display='none'">
+      <img src="logo.png" alt="LH" onerror="this.style.display='none'">
       <div class="topbar-div"></div>
       <div class="user-chip">
         <div class="uavatar" id="uAvatar"></div>
@@ -1776,7 +1775,7 @@ function abrirWhatsApp(tel,nome,interesse,e){
   const num=(tel||'').replace(/\D/g,'');
   if(!num){showToast('Lead sem telefone cadastrado','warning');return;}
   const fullNum=num.startsWith('55')?num:'55'+num;
-  const msg=encodeURIComponent(`Olá ${nome||''}! Tudo bem? Sou da ST Seminovos e gostaria de conversar sobre ${interesse||'um veículo do seu interesse'}. Posso te ajudar?`);
+  const msg=encodeURIComponent(`Olá ${nome||''}! Tudo bem? Sou da LH Seminovos e gostaria de conversar sobre ${interesse||'um veículo do seu interesse'}. Posso te ajudar?`);
   window.open(`https://wa.me/${fullNum}?text=${msg}`,'_blank');
 }
 
@@ -2199,7 +2198,7 @@ function gerarPDFFicha(id){
   </style></head><body>
   <div class="header">
     <div class="header-left">
-      <h1>ST Seminovos</h1>
+      <h1>LH Seminovos</h1>
       <p>📝 Ficha de Cadastro para Financiamento</p>
     </div>
     <div class="badge">Financiamento</div>
@@ -2272,11 +2271,11 @@ function gerarPDFFicha(id){
 
   <div class="assinaturas">
     <div><div class="assinatura">Assinatura do Cliente</div></div>
-    <div><div class="assinatura">ST Seminovos</div></div>
+    <div><div class="assinatura">LH Seminovos</div></div>
   </div>
 
   <div class="footer">
-    <p>Gerado em ${new Date().toLocaleString('pt-BR')} · ST Seminovos CRM</p>
+    <p>Gerado em ${new Date().toLocaleString('pt-BR')} · LH Seminovos CRM</p>
     <p>Este documento é confidencial</p>
   </div>
 

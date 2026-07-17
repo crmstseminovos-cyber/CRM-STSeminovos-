@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=Urbanist:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════════════
    ST SEMINOVOS CRM — DESIGN SYSTEM v7
@@ -790,7 +791,7 @@ h1,h2,h3,h4,h5,.modal-head h3,.page-title,.page-header-title,.tk-title,.table-to
   background:var(--surface-3);color:var(--text-3);cursor:pointer;
   font-size:11px;font-weight:700;transition:.15s;
 }
-.cat-opt2 span{font-size:22px}
+.cat-opt2 svg{width:20px;height:20px;stroke-width:1.75}
 .cat-opt2.sel{border-color:#00e676;box-shadow:0 0 10px rgba(0,230,118,.45);color:var(--text);background:rgba(0,230,118,.08)}
 .item-row2{display:flex;justify-content:space-between;align-items:center;background:var(--surface-3);border-radius:10px;padding:10px 14px;margin-bottom:6px;font-size:14px}
 .os-card2{background:var(--surface-3);border-radius:12px;padding:14px 16px;margin-bottom:10px;border:1px solid var(--border)}
@@ -1644,7 +1645,7 @@ tr:last-child td{border-bottom:none}
       <div id="page-estoque" class="page">
         <div class="estoque2-wrap">
           <div class="estoque2-top">
-            <h3>🚛 Estoque de Veículos</h3>
+            <h3><i data-lucide="truck" style="width:20px;height:20px;vertical-align:-4px;margin-right:6px"></i>Estoque de Veículos</h3>
             <button class="btn2-primary" onclick="openCaminhaoModal(0)">+ Novo Veículo</button>
           </div>
           <div class="estoque2-filters">
@@ -2624,11 +2625,12 @@ function renderEstoque(){
       </div>
       <div class="estoque2-valor">${c.valor?fmtBRL(c.valor):'Valor não informado'}</div>
       <div class="estoque2-actions">
-        <button onclick="openCaminhaoModal(${c.id})">✏️ Editar</button>
-        <button onclick="mudarStatusCam(${c.id})">📍 Status</button>
-        <button onclick="openCustosModal(${c.id})">💰 Custos</button>
+        <button onclick="openCaminhaoModal(${c.id})"><i data-lucide="pencil" style="width:14px;height:14px;vertical-align:-2px"></i> Editar</button>
+        <button onclick="mudarStatusCam(${c.id})"><i data-lucide="map-pin" style="width:14px;height:14px;vertical-align:-2px"></i> Status</button>
+        <button onclick="openCustosModal(${c.id})"><i data-lucide="dollar-sign" style="width:14px;height:14px;vertical-align:-2px"></i> Custos</button>
       </div>
     </div>`).join(''):`<div class="empty-state">Nenhum veículo encontrado</div>`;
+  if(typeof lucide!=='undefined')lucide.createIcons();
 }
 
 function openModal(html){document.getElementById('modalBox').innerHTML=html;document.getElementById('modalOverlay').classList.remove('hidden');}
@@ -3469,7 +3471,7 @@ function setTaskSugest(text){
 
 function openCaminhaoModal(id){
   const c=id?allCam.find(x=>x.id===id):null;
-  openModal(`<div class="modal-head"><h3>${c?'✏️ Editar Veículo':'🚛 Novo Veículo'}</h3><button class="modal-close" onclick="closeModal()">×</button></div>
+  openModal(`<div class="modal-head"><h3>${c?'Editar Veículo':'Novo Veículo'}</h3><button class="modal-close" onclick="closeModal()">×</button></div>
     <div class="modal-body">
       <div style="display:flex;justify-content:center;margin-bottom:14px" id="cm_plate_preview">${plateHTML(c?.placa||'')}</div>
       <div class="form-row"><label>Placa</label><div style="display:flex;gap:8px"><input id="cm_placa" class="glow2" value="${c?.placa||''}" placeholder="ABC1D23" style="flex:1;text-transform:uppercase" oninput="this.value=this.value.toUpperCase();atualizarPreviewPlaca()"><button class="btn btn-primary" onclick="buscarPlaca()" id="btnBuscarPlaca">🔍 Buscar</button></div><div id="placa_status" style="font-size:12px;margin-top:5px;color:var(--muted)"></div></div>
@@ -3550,7 +3552,7 @@ async function mudarStatusCam(id){
   const c=allCam.find(x=>x.id===id);if(!c)return;
   const opts=['Disponível','Funilaria','Tapeçaria','Mecânica','Lavagem','Reservado','Vendido'];
   const sb2={'Disponível':'b-disp','Funilaria':'b-fun','Tapeçaria':'b-tap','Mecânica':'b-mec','Lavagem':'b-lav','Reservado':'b-res','Vendido':'b-vend'};
-  openModal(`<div class="modal-head"><h3>📍 ${c.modelo}</h3><button class="modal-close" onclick="closeModal()">×</button></div>
+  openModal(`<div class="modal-head"><h3>${c.modelo}</h3><button class="modal-close" onclick="closeModal()">×</button></div>
     <div class="modal-body"><div style="display:flex;flex-direction:column;gap:8px">
       ${opts.map(s=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:1.5px solid ${s===c.status?'var(--green)':'var(--border)'};background:${s===c.status?'#f0fdf4':'#fff'};cursor:pointer" onclick="setStatusCam(${id},'${s}')">
         <span class="badge ${sb2[s]}">${s}</span>${s===c.status?' ← atual':''}</div>`).join('')}
@@ -3563,9 +3565,9 @@ async function setStatusCam(id,status){
 
 // ── CENTRAL DE CUSTOS ──
 const CATEGORIAS_CUSTO=[
-  {n:'Funilaria',e:'🔧'},{n:'Mecânica',e:'⚙️'},{n:'Borracharia',e:'🛞'},
-  {n:'Elétrica',e:'⚡'},{n:'Tapeçaria',e:'🪑'},{n:'Documentação',e:'📄'},
-  {n:'Lavagem',e:'💧'},{n:'Outro',e:'➕'}
+  {n:'Funilaria',e:'hammer'},{n:'Mecânica',e:'settings'},{n:'Borracharia',e:'disc'},
+  {n:'Elétrica',e:'zap'},{n:'Tapeçaria',e:'armchair'},{n:'Documentação',e:'file-text'},
+  {n:'Lavagem',e:'droplets'},{n:'Outro',e:'more-horizontal'}
 ];
 async function openCustosModal(camId){
   camAtualCustos=camId;itensNovaOS=[];catNovaOS=null;
@@ -3575,10 +3577,11 @@ async function openCustosModal(camId){
   if(error){showToast('Erro ao carregar custos: '+error.message,'error');return;}
   custosDoVeiculo=data||[];
   openModal(renderCustosModalHTML(cam));
+  if(typeof lucide!=='undefined')lucide.createIcons();
 }
 function renderCustosModalHTML(cam){
   const total=custosDoVeiculo.reduce((a,o)=>a+Number(o.valor_total||0),0);
-  return `<div class="modal-head"><h3>💰 Central de Custos</h3><button class="modal-close" onclick="closeModal()">×</button></div>
+  return `<div class="modal-head"><h3>Central de Custos</h3><button class="modal-close" onclick="closeModal()">×</button></div>
   <div class="modal-body">
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">
       ${plateHTML(cam.placa)}
@@ -3590,7 +3593,7 @@ function renderCustosModalHTML(cam){
     </div>
     <div id="novaOSForm" style="display:none;background:var(--surface-3);border-radius:14px;padding:16px;margin-bottom:14px">
       <div class="cat-grid2" id="catGridCusto">
-        ${CATEGORIAS_CUSTO.map(c=>`<div class="cat-opt2" id="cat_${c.n}" onclick="selecionarCategoriaCusto('${c.n}')"><span>${c.e}</span>${c.n}</div>`).join('')}
+        ${CATEGORIAS_CUSTO.map(c=>`<div class="cat-opt2" id="cat_${c.n}" onclick="selecionarCategoriaCusto('${c.n}')"><i data-lucide="${c.e}" style="width:20px;height:20px"></i>${c.n}</div>`).join('')}
       </div>
       <div class="form-grid">
         <div class="form-row"><label>Prestador</label><input id="custo_prest" class="glow2" placeholder="Nome do prestador" oninput="validarNovaOS()"></div>
@@ -3610,7 +3613,10 @@ function renderCustosModalHTML(cam){
       <div id="avisoCusto" style="display:none;color:var(--red);font-size:var(--text-sm);margin-top:8px"></div>
     </div>
     <div id="listaOSCusto">${renderListaOSHTML()}</div>
-    <div style="text-align:right;font-weight:800;font-size:var(--text-lg);border-top:1px solid var(--border);padding-top:10px;margin-top:10px">Total: ${fmtBRL(total)}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:10px;margin-top:10px">
+      <button class="btn" onclick="gerarResumoOS()"><i data-lucide="file-down" style="width:16px;height:16px;vertical-align:-3px;margin-right:6px"></i>Gerar resumo</button>
+      <div style="font-weight:800;font-size:var(--text-lg)">Total: ${fmtBRL(total)}</div>
+    </div>
   </div>
   <div class="modal-footer"><button class="btn" onclick="closeModal()">Fechar</button></div>`;
 }
@@ -3659,7 +3665,8 @@ function removerItemCusto(idx){
 function renderItensNovaOS(){
   const el=document.getElementById('itensListCusto');
   let sub=0;
-  el.innerHTML=itensNovaOS.map((it,idx)=>{sub+=it.valor;return`<div class="item-row2"><span>${it.desc}</span><span>${fmtBRL(it.valor)} <button class="btn btn-icon btn-sm" onclick="removerItemCusto(${idx})" style="margin-left:6px">🗑️</button></span></div>`;}).join('');
+  el.innerHTML=itensNovaOS.map((it,idx)=>{sub+=it.valor;return`<div class="item-row2"><span>${it.desc}</span><span>${fmtBRL(it.valor)} <button class="btn btn-icon btn-sm" onclick="removerItemCusto(${idx})" style="margin-left:6px"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></span></div>`;}).join('');
+  if(typeof lucide!=='undefined')lucide.createIcons();
   document.getElementById('subtotalCusto').textContent=fmtBRL(sub);
 }
 function validarNovaOS(){
@@ -3690,6 +3697,59 @@ async function salvarOS(){
   if(error){showToast('Erro ao salvar OS: '+error.message,'error');return;}
   showToast('OS salva com sucesso!','success');
   await openCustosModal(camAtualCustos);
+}
+function gerarResumoOS(){
+  if(!custosDoVeiculo.length){showToast('Nenhuma OS lançada ainda para esse veículo','warning');return;}
+  const cam=allCam.find(x=>x.id===camAtualCustos);
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF();
+  const navy=[10,22,40],green=[0,200,83],grayText=[85,85,85],lightGray=[242,242,242];
+  const W=doc.internal.pageSize.getWidth();
+  let y=20;
+
+  doc.setFillColor(...navy);doc.rect(0,0,W,26,'F');
+  doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(15);
+  doc.text('Painel de custos',14,13);
+  doc.setFont('helvetica','normal');doc.setFontSize(9);
+  doc.text(`${cam.modelo}${cam.ano?' - Ano '+cam.ano:''}${cam.placa?' - Placa '+cam.placa:''}`,14,20);
+
+  y=36;
+  doc.setTextColor(0,0,0);doc.setFontSize(9);
+  doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')}   |   ${custosDoVeiculo.length} OS lancadas`,14,y);
+  y+=10;
+
+  let totalGeral=0;
+  custosDoVeiculo.forEach(o=>{
+    const itens=o.itens||[];
+    const blocoAltura=8+itens.length*6+6;
+    if(y+blocoAltura>280){doc.addPage();y=20;}
+
+    doc.setFillColor(...navy);doc.rect(14,y-5,W-28,7,'F');
+    doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(9);
+    doc.text(`${o.categoria} - ${o.prestador||'sem prestador'}`,17,y);
+    doc.text(o.data_servico?fmtDataBR(o.data_servico):'',W-17,y,{align:'right'});
+    y+=8;
+
+    doc.setTextColor(0,0,0);doc.setFont('helvetica','normal');doc.setFontSize(9);
+    itens.forEach(it=>{
+      doc.text('- '+it.desc,20,y);
+      doc.text(fmtBRL(it.valor),W-17,y,{align:'right'});
+      y+=6;
+    });
+    const subtotal=itens.reduce((a,i)=>a+Number(i.valor||0),0);
+    totalGeral+=subtotal;
+    doc.setTextColor(...grayText);doc.setFont('helvetica','italic');doc.setFontSize(8);
+    doc.text('Subtotal da OS: '+fmtBRL(subtotal),W-17,y,{align:'right'});
+    y+=9;
+  });
+
+  doc.setFillColor(...green);doc.rect(14,y-5,W-28,9,'F');
+  doc.setTextColor(...navy);doc.setFont('helvetica','bold');doc.setFontSize(11);
+  doc.text('TOTAL GERAL',17,y);
+  doc.text(fmtBRL(totalGeral),W-17,y,{align:'right'});
+
+  const nomeArquivo=`resumo_custos_${(cam.placa||cam.modelo).replace(/\s/g,'_')}.pdf`;
+  doc.save(nomeArquivo);
 }
 
 // ── EXPORTAR ──

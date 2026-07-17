@@ -794,7 +794,8 @@ h1,h2,h3,h4,h5,.modal-head h3,.page-title,.page-header-title,.tk-title,.table-to
 .cat-opt2 svg{width:20px;height:20px;stroke-width:1.75}
 .cat-opt2.sel{border-color:#00e676;box-shadow:0 0 10px rgba(0,230,118,.45);color:var(--text);background:rgba(0,230,118,.08)}
 .item-row2{display:flex;justify-content:space-between;align-items:center;background:var(--surface-3);border-radius:10px;padding:10px 14px;margin-bottom:6px;font-size:14px}
-.os-card2{background:var(--surface-3);border-radius:12px;padding:14px 16px;margin-bottom:10px;border:1px solid var(--border)}
+.os-card2{background:var(--surface-3);border-radius:12px;padding:14px 16px;margin-bottom:10px;border:1px solid var(--border);cursor:pointer;transition:.15s}
+.os-card2:hover{border-color:#00e676;box-shadow:0 0 10px rgba(0,230,118,.25)}
 .os-card2-head{display:flex;justify-content:space-between;font-weight:800;font-size:14px;margin-bottom:4px}
 .os-card2-sub{font-size:12px;color:var(--text-4)}
 
@@ -1702,7 +1703,7 @@ const COLS_DEF={
   financiamento:[{id:'aguardando_docs',label:'📄 Aguard. docs',cor:'#f59e0b'},{id:'preenchimento',label:'📝 Preench. ficha',cor:'#3b82f6'},{id:'aguardando_resp',label:'⏳ Aguard. resposta',cor:'#8b5cf6'},{id:'pendencia',label:'🔄 Pendência',cor:'#f97316'},{id:'aprovado',label:'✅ Aprovado',cor:'#00c853'},{id:'aprovado_restricao',label:'⚠️ Aprov. c/ restrição',cor:'#eab308'},{id:'reprovado',label:'Reprovado',cor:'#ef4444'}]
 };
 let perfil=null,allLeads=[],allCam=[],activeDept='sdr',modalTab='dados';
-let camAtualCustos=null,custosDoVeiculo=[],itensNovaOS=[],catNovaOS=null;
+let camAtualCustos=null,custosDoVeiculo=[],itensNovaOS=[],catNovaOS=null,editingOsId=null;
 let colunas=JSON.parse(JSON.stringify(COLS_DEF));
 let tkFilter='hoje',calOffset=0,calSelDay=null;
 let quickTasks=JSON.parse(localStorage.getItem('st_qtasks')||'[]');
@@ -3589,9 +3590,10 @@ function renderCustosModalHTML(cam){
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <strong>Ordens de serviço</strong>
-      <button class="btn2-primary" style="padding:8px 16px;font-size:13px" onclick="toggleNovaOSForm()">+ Nova OS</button>
+      <button class="btn2-primary" style="padding:8px 16px;font-size:13px" onclick="abrirNovaOSForm()">+ Nova OS</button>
     </div>
     <div id="novaOSForm" style="display:none;background:var(--surface-3);border-radius:14px;padding:16px;margin-bottom:14px">
+      <strong id="formOSTitle" style="display:block;margin-bottom:12px">Nova OS</strong>
       <div class="cat-grid2" id="catGridCusto">
         ${CATEGORIAS_CUSTO.map(c=>`<div class="cat-opt2" id="cat_${c.n}" onclick="selecionarCategoriaCusto('${c.n}')"><i data-lucide="${c.e}" style="width:20px;height:20px"></i>${c.n}</div>`).join('')}
       </div>
@@ -3609,7 +3611,10 @@ function renderCustosModalHTML(cam){
         <div style="text-align:right;font-weight:700;margin-top:6px">Subtotal: <span id="subtotalCusto">R$ 0,00</span></div>
       </div>
       <div class="form-row"><label>Observação (opcional)</label><input id="custo_obs" class="glow2" placeholder="Observação"></div>
-      <button class="btn2-primary" id="btnSalvarOS" disabled style="opacity:.5;cursor:not-allowed" onclick="salvarOS()">Salvar OS</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn2-primary" id="btnSalvarOS" disabled style="opacity:.5;cursor:not-allowed" onclick="salvarOS()">Salvar OS</button>
+        <button class="btn" id="btnExcluirOS" style="display:none;border-color:var(--red);color:var(--red)" onclick="excluirOS()">Excluir OS</button>
+      </div>
       <div id="avisoCusto" style="display:none;color:var(--red);font-size:var(--text-sm);margin-top:8px"></div>
     </div>
     <div id="listaOSCusto">${renderListaOSHTML()}</div>
@@ -3623,16 +3628,41 @@ function renderCustosModalHTML(cam){
 function renderListaOSHTML(){
   if(!custosDoVeiculo.length)return'<div class="empty-state">Nenhuma OS lançada ainda</div>';
   return custosDoVeiculo.map(o=>{
-    const itensTxt=(o.itens||[]).map(i=>i.desc).join(', ');
-    return `<div class="os-card2"><div class="os-card2-head"><span>${o.categoria} · ${o.prestador||'sem prestador'}</span><span>${fmtBRL(o.valor_total||0)}</span></div>
+    return `<div class="os-card2" onclick="abrirOSDetalhe(${o.id})"><div class="os-card2-head"><span>OS Nº ${o.id} · ${o.categoria} · ${o.prestador||'sem prestador'}</span><span>${fmtBRL(o.valor_total||0)}</span></div>
     <div class="os-card2-sub">${(o.itens||[]).map(i=>i.desc).join(', ')}${o.data_servico?' · '+fmtDataBR(o.data_servico):''}${o.observacao?' · '+o.observacao:''}</div></div>`;
   }).join('');
 }
 function fmtDataBR(iso){if(!iso)return'';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;}
-function toggleNovaOSForm(){
-  const f=document.getElementById('novaOSForm');
-  f.style.display=f.style.display==='none'?'block':'none';
-  if(f.style.display==='block'){document.getElementById('custo_data').valueAsDate=new Date();}
+function abrirNovaOSForm(){
+  editingOsId=null;catNovaOS=null;itensNovaOS=[];
+  document.getElementById('custo_prest').value='';
+  document.getElementById('custo_obs').value='';
+  CATEGORIAS_CUSTO.forEach(c=>document.getElementById('cat_'+c.n).classList.remove('sel'));
+  renderItensNovaOS();
+  document.getElementById('formOSTitle').textContent='Nova OS';
+  document.getElementById('btnSalvarOS').textContent='Salvar OS';
+  document.getElementById('btnExcluirOS').style.display='none';
+  document.getElementById('novaOSForm').style.display='block';
+  document.getElementById('custo_data').valueAsDate=new Date();
+  validarNovaOS();
+}
+function abrirOSDetalhe(id){
+  const o=custosDoVeiculo.find(x=>x.id===id);
+  if(!o)return;
+  editingOsId=id;
+  catNovaOS=o.categoria;
+  itensNovaOS=(o.itens||[]).map(i=>({...i}));
+  document.getElementById('custo_prest').value=o.prestador||'';
+  document.getElementById('custo_data').value=o.data_servico||'';
+  document.getElementById('custo_obs').value=o.observacao||'';
+  CATEGORIAS_CUSTO.forEach(c=>document.getElementById('cat_'+c.n).classList.toggle('sel',c.n===o.categoria));
+  renderItensNovaOS();
+  document.getElementById('formOSTitle').textContent='Editar OS Nº '+o.id;
+  document.getElementById('btnSalvarOS').textContent='Salvar alterações';
+  document.getElementById('btnExcluirOS').style.display='inline-flex';
+  document.getElementById('novaOSForm').style.display='block';
+  document.getElementById('novaOSForm').scrollIntoView({behavior:'smooth',block:'start'});
+  validarNovaOS();
 }
 function selecionarCategoriaCusto(cat){
   catNovaOS=cat;
@@ -3692,10 +3722,26 @@ async function salvarOS(){
   const data_servico=document.getElementById('custo_data').value;
   const observacao=document.getElementById('custo_obs').value||null;
   const valor_total=itensNovaOS.reduce((a,i)=>a+i.valor,0);
-  const obj={caminhao_id:camAtualCustos,categoria:catNovaOS,prestador,data_servico,itens:itensNovaOS,valor_total,observacao,status:'Concluída'};
-  const{error}=await sb.from('os_custos').insert(obj);
+  const obj={caminhao_id:camAtualCustos,categoria:catNovaOS,prestador,data_servico,itens:itensNovaOS,valor_total,observacao};
+  let error;
+  if(editingOsId){
+    ({error}=await sb.from('os_custos').update(obj).eq('id',editingOsId));
+  } else {
+    obj.status='Concluída';
+    ({error}=await sb.from('os_custos').insert(obj));
+  }
   if(error){showToast('Erro ao salvar OS: '+error.message,'error');return;}
-  showToast('OS salva com sucesso!','success');
+  showToast(editingOsId?'OS atualizada com sucesso!':'OS salva com sucesso!','success');
+  editingOsId=null;
+  await openCustosModal(camAtualCustos);
+}
+async function excluirOS(){
+  if(!editingOsId)return;
+  if(!confirm('Tem certeza que deseja excluir esta OS? Essa ação não pode ser desfeita.'))return;
+  const{error}=await sb.from('os_custos').delete().eq('id',editingOsId);
+  if(error){showToast('Erro ao excluir: '+error.message,'error');return;}
+  showToast('OS excluída','success');
+  editingOsId=null;
   await openCustosModal(camAtualCustos);
 }
 function gerarResumoOS(){
@@ -3726,7 +3772,7 @@ function gerarResumoOS(){
 
     doc.setFillColor(...navy);doc.rect(14,y-5,W-28,7,'F');
     doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(9);
-    doc.text(`${o.categoria} - ${o.prestador||'sem prestador'}`,17,y);
+    doc.text(`OS ${o.id} - ${o.categoria} - ${o.prestador||'sem prestador'}`,17,y);
     doc.text(o.data_servico?fmtDataBR(o.data_servico):'',W-17,y,{align:'right'});
     y+=8;
 
@@ -3749,7 +3795,9 @@ function gerarResumoOS(){
   doc.text(fmtBRL(totalGeral),W-17,y,{align:'right'});
 
   const nomeArquivo=`resumo_custos_${(cam.placa||cam.modelo).replace(/\s/g,'_')}.pdf`;
-  doc.save(nomeArquivo);
+  doc.setProperties({title:nomeArquivo});
+  const blobUrl=doc.output('bloburl');
+  window.open(blobUrl,'_blank');
 }
 
 // ── EXPORTAR ──
